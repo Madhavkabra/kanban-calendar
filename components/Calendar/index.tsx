@@ -11,11 +11,13 @@ import { useMediaQuery } from "react-responsive";
 import EdgeDragWatcher from "../EdgeDragWatcher";
 import { TouchBackend } from "react-dnd-touch-backend";
 import { MultiBackend, TouchTransition } from "react-dnd-multi-backend";
+import CalendarModal from "../CalendarModal";
 
 const Calendar = () => {
   const isMobile = useMediaQuery({ maxWidth: 768 });
   const [currentDate, setCurrentDate] = useState(new Date("2024-03-11"));
   const [calendarEvents, setCalendarEvents] = useState(events);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   // Calculate current and next sets of dates
   const currentWeekDates = useMemo(() => {
@@ -70,75 +72,87 @@ const Calendar = () => {
   });
 
   return (
-    <DndProvider backend={MultiBackend} options={getBackendOptions()}>
-      <EdgeDragWatcher
-        moveToNext={handleNext}
-        moveToPrev={handlePrev}
-        isMobile={isMobile}
-      />
+    <>
+      {selectedEvent && (
+        <CalendarModal
+          events={[...Object.values(events).flat()]}
+          initialEvent={selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+        />
+      )}
 
-      <div className="min-h-screen sm:p-4 bg-gradient-to-br from-[#f6f8ff] to-[#eef1f9]">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-4">
-          <button onClick={handlePrev} className="text-xl cursor-pointer">
-            ←
-          </button>
-          <h1 className="text-lg font-bold">
-            {isMobile
-              ? format(currentDate, "EEE, MMM d")
-              : `${format(currentWeekDates[0], "MMM d")} - ${format(
-                  currentWeekDates[6],
-                  "MMM d"
-                )}`}
-          </h1>
-          <button onClick={handleNext} className="text-xl cursor-pointer">
-            →
-          </button>
-        </div>
+      <DndProvider backend={MultiBackend} options={getBackendOptions()}>
+        <EdgeDragWatcher
+          moveToNext={handleNext}
+          moveToPrev={handlePrev}
+          isMobile={isMobile}
+        />
 
-        {/* Calendar Grid */}
-        {isMobile ? (
-          <div className="relative">
-            {[currentDate, addDays(currentDate, 1)].map((date, index) => {
-              const dayStr = format(date, "yyyy-MM-dd");
-              const isCurrent = index === 0;
-              return (
-                <div
-                  key={index}
-                  className={`absolute top-0 left-0 w-full transition-opacity duration-300 ${
-                    isCurrent
-                      ? "opacity-100 z-10"
-                      : "opacity-0 pointer-events-none z-0"
-                  }`}
-                >
-                  <DropColumn
-                    date={date}
-                    events={calendarEvents[dayStr] ?? []}
-                    onDropEvent={(event) => handleDrop(dayStr, event)}
-                  />
-                </div>
-              );
-            })}
+        <div className="min-h-screen sm:p-4 p-2 bg-gradient-to-br from-[#f6f8ff] to-[#eef1f9]">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-4">
+            <button onClick={handlePrev} className="text-xl cursor-pointer">
+              ←
+            </button>
+            <h1 className="text-lg font-bold">
+              {isMobile
+                ? format(currentDate, "EEE, MMM d")
+                : `${format(currentWeekDates[0], "MMM d")} - ${format(
+                    currentWeekDates[6],
+                    "MMM d"
+                  )}`}
+            </h1>
+            <button onClick={handleNext} className="text-xl cursor-pointer">
+              →
+            </button>
           </div>
-        ) : (
-          <div>
-            <div className="grid grid-cols-7 gap-4">
-              {currentWeekDates.map((date) => {
+
+          {/* Calendar Grid */}
+          {isMobile ? (
+            <div className="relative">
+              {[currentDate, addDays(currentDate, 1)].map((date, index) => {
                 const dayStr = format(date, "yyyy-MM-dd");
+                const isCurrent = index === 0;
                 return (
-                  <DropColumn
-                    key={dayStr}
-                    date={date}
-                    events={calendarEvents[dayStr] ?? []}
-                    onDropEvent={(event) => handleDrop(dayStr, event)}
-                  />
+                  <div
+                    key={index}
+                    className={`absolute top-0 left-0 w-full transition-opacity duration-300 ${
+                      isCurrent
+                        ? "opacity-100 z-10"
+                        : "opacity-0 pointer-events-none z-0"
+                    }`}
+                  >
+                    <DropColumn
+                      date={date}
+                      onCardClick={(event) => setSelectedEvent(event)}
+                      events={calendarEvents[dayStr] ?? []}
+                      onDropEvent={(event) => handleDrop(dayStr, event)}
+                    />
+                  </div>
                 );
               })}
             </div>
-          </div>
-        )}
-      </div>
-    </DndProvider>
+          ) : (
+            <div>
+              <div className="grid grid-cols-7 gap-4">
+                {currentWeekDates.map((date) => {
+                  const dayStr = format(date, "yyyy-MM-dd");
+                  return (
+                    <DropColumn
+                      key={dayStr}
+                      onCardClick={(event) => setSelectedEvent(event)}
+                      date={date}
+                      events={calendarEvents[dayStr] ?? []}
+                      onDropEvent={(event) => handleDrop(dayStr, event)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </DndProvider>
+    </>
   );
 };
 

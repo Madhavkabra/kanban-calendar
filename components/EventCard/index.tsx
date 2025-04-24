@@ -1,10 +1,17 @@
 import { Event } from "@/types";
 import Image from "next/image";
 
-export default function EventCard({ event }: Readonly<{ event: Event }>) {
+export default function EventCard({
+  event,
+  customClass,
+}: Readonly<{ event: Event; customClass?: string }>) {
   return (
     <div className="cursor-pointer rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-md mb-3">
-      <div className="mt-2 w-full h-32 relative rounded-md overflow-hidden">
+      <div
+        className={`mt-2 w-full ${
+          customClass ?? "h-32"
+        } relative rounded-md overflow-hidden`}
+      >
         <Image
           src={event.imageUrl}
           alt={event.title}

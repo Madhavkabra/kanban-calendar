@@ -1,16 +1,18 @@
 import { useDrag } from "react-dnd";
+import { motion } from "framer-motion";
 import EventCard from "../EventCard";
 import { Event } from "@/types";
 import { useEffect, useRef } from "react";
 
 interface DraggableEventCardProps {
   event: Event;
+  onClick?: (event: Event) => void;
 }
 
 export default function DraggableEventCard({
   event,
-}: //   onClick,
-Readonly<DraggableEventCardProps>) {
+  onClick,
+}: DraggableEventCardProps) {
   const dragRef = useRef<HTMLDivElement | null>(null);
 
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -21,7 +23,6 @@ Readonly<DraggableEventCardProps>) {
     }),
   }));
 
-  // Attach the drop to the ref manually
   useEffect(() => {
     if (dragRef.current) {
       drag(dragRef.current);
@@ -29,11 +30,15 @@ Readonly<DraggableEventCardProps>) {
   }, [drag]);
 
   return (
-    <div
+    <motion.div
       ref={dragRef}
-      className={`${isDragging ? "opacity-50" : "opacity-100"} sm:max-w-full max-w-[90%]`}
+      layoutId={`event-${event.id}`}
+      onClick={() => onClick?.(event)}
+      className={`cursor-pointer ${
+        isDragging ? "opacity-50" : "opacity-100"
+      } sm:max-w-full max-w-[90%]`}
     >
       <EventCard event={event} />
-    </div>
+    </motion.div>
   );
 }
