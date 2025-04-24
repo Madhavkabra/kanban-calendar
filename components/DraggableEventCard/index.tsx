@@ -31,7 +31,7 @@ Readonly<DraggableEventCardProps>) {
   return (
     <div
       ref={dragRef}
-      className={`${isDragging ? "opacity-50" : "opacity-100"}`}
+      className={`${isDragging ? "opacity-50" : "opacity-100"} sm:max-w-full max-w-[90%]`}
     >
       <EventCard event={event} />
     </div>

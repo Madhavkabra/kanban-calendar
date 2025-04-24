@@ -38,7 +38,7 @@ export default function EdgeDragWatcher({
         } else if (isAtRight) {
           moveToNext();
         }
-      }, 1500);
+      }, 1000);
     } else {
       clearTimeout(edgeTimerRef.current!);
       edgeTimerRef.current = null;
