@@ -35,7 +35,7 @@ export default function DropColumn({
   return (
     <div
       ref={dropRef}
-      className={` rounded-xl shadow p-2 transition-colors duration-200 ${
+      className={` rounded-xl shadow p-2 transition-colors duration-200 min-h-screen ${
         isOver ? "bg-blue-100" : "bg-white"
       }`}
     >

@@ -9,6 +9,7 @@ import { useMemo, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useMediaQuery } from "react-responsive";
+import EdgeDragWatcher from "../EdgeDragWatcher";
 
 const Calendar = () => {
   const isMobile = useMediaQuery({ maxWidth: 768 });
@@ -49,8 +50,11 @@ const Calendar = () => {
     });
   };
 
+
+
   return (
     <DndProvider backend={HTML5Backend}>
+      <EdgeDragWatcher moveToNext={handleNext} moveToPrev={handlePrev} isMobile={isMobile} />
       <div className="min-h-screen p-4 bg-gradient-to-br from-[#f6f8ff] to-[#eef1f9]">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
