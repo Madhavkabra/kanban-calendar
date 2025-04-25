@@ -69,8 +69,8 @@ export default function CalendarModal({
                     style={{ zIndex: 100 - i }}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{
-                      x: i * 10,
-                      y: i * 10,
+                      x: i * 16,
+                      y: i * 24,
                       scale: 1 - i * 0.05,
                       opacity: 1 - i * 0.1,
                     }}

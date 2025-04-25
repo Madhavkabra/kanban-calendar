@@ -11,7 +11,8 @@ export default function EdgeDragWatcher({
   moveToNext: () => void;
   moveToPrev: () => void;
 }) {
-  const edgeTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const edgeIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const edgeDelayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const { isDragging, clientOffset } = useDragLayer((monitor) => ({
     isDragging: monitor.isDragging(),
@@ -20,8 +21,7 @@ export default function EdgeDragWatcher({
 
   useEffect(() => {
     if (!isDragging || !clientOffset) {
-      clearTimeout(edgeTimerRef.current!);
-      edgeTimerRef.current = null;
+      clearTimers();
       return;
     }
 
@@ -31,23 +31,40 @@ export default function EdgeDragWatcher({
 
     const isAtLeft = x < threshold;
     const isAtRight = x > screenWidth - threshold;
+
     if (isAtLeft || isAtRight) {
-      edgeTimerRef.current = setTimeout(() => {
-        if (isAtLeft) {
-          moveToPrev();
-        } else if (isAtRight) {
-          moveToNext();
-        }
-      }, 1000);
+      // Start delay timer if not already started
+      if (!edgeDelayTimerRef.current && !edgeIntervalRef.current) {
+        edgeDelayTimerRef.current = setTimeout(() => {
+          if (isAtLeft) moveToPrev();
+          if (isAtRight) moveToNext();
+
+          // Then set up continuous scrolling
+          edgeIntervalRef.current = setInterval(() => {
+            if (isAtLeft) moveToPrev();
+            if (isAtRight) moveToNext();
+          }, 1000);
+
+          edgeDelayTimerRef.current = null;
+        }, 1000);
+      }
     } else {
-      clearTimeout(edgeTimerRef.current!);
-      edgeTimerRef.current = null;
+      clearTimers();
     }
 
-    return () => {
-      clearTimeout(edgeTimerRef.current!);
-    };
+    return () => clearTimers();
   }, [isDragging, clientOffset, isMobile]);
 
-  return null; // This component just hooks into the drag layer
+  const clearTimers = () => {
+    if (edgeDelayTimerRef.current) {
+      clearTimeout(edgeDelayTimerRef.current);
+      edgeDelayTimerRef.current = null;
+    }
+    if (edgeIntervalRef.current) {
+      clearInterval(edgeIntervalRef.current);
+      edgeIntervalRef.current = null;
+    }
+  };
+
+  return null;
 }

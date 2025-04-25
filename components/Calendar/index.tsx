@@ -4,7 +4,7 @@ import DropColumn from "@/components/DropColumn";
 import events from "@/data/index";
 import { Event } from "@/types";
 import { addDays, format, startOfWeek, subDays } from "date-fns";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useMediaQuery } from "react-responsive";
@@ -71,6 +71,11 @@ const Calendar = () => {
     ],
   });
 
+  const currentDateRef = useRef(currentDate);
+  useEffect(() => {
+    currentDateRef.current = currentDate;
+  }, [currentDate]);
+
   return (
     <>
       {selectedEvent && (
@@ -110,27 +115,14 @@ const Calendar = () => {
           {/* Calendar Grid */}
           {isMobile ? (
             <div className="relative">
-              {[currentDate, addDays(currentDate, 1)].map((date, index) => {
-                const dayStr = format(date, "yyyy-MM-dd");
-                const isCurrent = index === 0;
-                return (
-                  <div
-                    key={index}
-                    className={`absolute top-0 left-0 w-full transition-opacity duration-300 ${
-                      isCurrent
-                        ? "opacity-100 z-10"
-                        : "opacity-0 pointer-events-none z-0"
-                    }`}
-                  >
-                    <DropColumn
-                      date={date}
-                      onCardClick={(event) => setSelectedEvent(event)}
-                      events={calendarEvents[dayStr] ?? []}
-                      onDropEvent={(event) => handleDrop(dayStr, event)}
-                    />
-                  </div>
-                );
-              })}
+              <DropColumn
+                date={currentDate}
+                onCardClick={(event) => setSelectedEvent(event)}
+                events={calendarEvents[format(currentDate, "yyyy-MM-dd")] ?? []}
+                onDropEvent={(event) => {
+                  handleDrop(format(currentDateRef.current, "yyyy-MM-dd"), event);
+                }}
+              />
             </div>
           ) : (
             <div>
