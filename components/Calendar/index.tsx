@@ -25,6 +25,17 @@ const Calendar = () => {
     return Array.from({ length: 7 }, (_, i) => addDays(start, i));
   }, [currentDate]);
 
+  const [showBoard, setShowBoard] = useState(false);
+
+  useEffect(() => {
+    // code to load next pages
+    handleNext();
+    setTimeout(() => {
+      handlePrev();
+      setShowBoard(true);
+    }, 0);
+  }, []);
+
   const handleNext = () => {
     setCurrentDate((prev) => (isMobile ? addDays(prev, 1) : addDays(prev, 7)));
   };
@@ -93,56 +104,63 @@ const Calendar = () => {
           isMobile={isMobile}
         />
 
-        <div className="min-h-screen sm:p-4 p-2 bg-gradient-to-br from-[#f6f8ff] to-[#eef1f9]">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-4">
-            <button onClick={handlePrev} className="text-xl cursor-pointer">
-              ←
-            </button>
-            <h1 className="text-lg font-bold">
-              {isMobile
-                ? format(currentDate, "EEE, MMM d")
-                : `${format(currentWeekDates[0], "MMM d")} - ${format(
-                    currentWeekDates[6],
-                    "MMM d"
-                  )}`}
-            </h1>
-            <button onClick={handleNext} className="text-xl cursor-pointer">
-              →
-            </button>
-          </div>
+        {showBoard && (
+          <div className="min-h-screen sm:p-4 p-2 bg-gradient-to-br from-[#f6f8ff] to-[#eef1f9]">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-4">
+              <button onClick={handlePrev} className="text-xl cursor-pointer">
+                ←
+              </button>
+              <h1 className="text-lg font-bold">
+                {isMobile
+                  ? format(currentDate, "EEE, MMM d")
+                  : `${format(currentWeekDates[0], "MMM d")} - ${format(
+                      currentWeekDates[6],
+                      "MMM d"
+                    )}`}
+              </h1>
+              <button onClick={handleNext} className="text-xl cursor-pointer">
+                →
+              </button>
+            </div>
 
-          {/* Calendar Grid */}
-          {isMobile ? (
-            <div className="relative">
-              <DropColumn
-                date={currentDate}
-                onCardClick={(event) => setSelectedEvent(event)}
-                events={calendarEvents[format(currentDate, "yyyy-MM-dd")] ?? []}
-                onDropEvent={(event) => {
-                  handleDrop(format(currentDateRef.current, "yyyy-MM-dd"), event);
-                }}
-              />
-            </div>
-          ) : (
-            <div>
-              <div className="grid grid-cols-7 gap-4">
-                {currentWeekDates.map((date) => {
-                  const dayStr = format(date, "yyyy-MM-dd");
-                  return (
-                    <DropColumn
-                      key={dayStr}
-                      onCardClick={(event) => setSelectedEvent(event)}
-                      date={date}
-                      events={calendarEvents[dayStr] ?? []}
-                      onDropEvent={(event) => handleDrop(dayStr, event)}
-                    />
-                  );
-                })}
+            {/* Calendar Grid */}
+            {isMobile ? (
+              <div className="relative">
+                <DropColumn
+                  date={currentDate}
+                  onCardClick={(event) => setSelectedEvent(event)}
+                  events={
+                    calendarEvents[format(currentDate, "yyyy-MM-dd")] ?? []
+                  }
+                  onDropEvent={(event) => {
+                    handleDrop(
+                      format(currentDateRef.current, "yyyy-MM-dd"),
+                      event
+                    );
+                  }}
+                />
               </div>
-            </div>
-          )}
-        </div>
+            ) : (
+              <div>
+                <div className="grid grid-cols-7 gap-4">
+                  {currentWeekDates.map((date) => {
+                    const dayStr = format(date, "yyyy-MM-dd");
+                    return (
+                      <DropColumn
+                        key={dayStr}
+                        onCardClick={(event) => setSelectedEvent(event)}
+                        date={date}
+                        events={calendarEvents[dayStr] ?? []}
+                        onDropEvent={(event) => handleDrop(dayStr, event)}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </DndProvider>
     </>
   );
