@@ -1,113 +1,112 @@
 import { Event } from "@/types";
-import { motion, AnimatePresence, PanInfo } from "framer-motion";
-import EventCard from "../EventCard";
-import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function CalendarModal({
-  events,
   initialEvent,
   onClose,
 }: {
-  events: Event[];
   initialEvent: Event;
   onClose: () => void;
 }) {
-  const initialIndex = events?.findIndex((e) => e.id === initialEvent.id);
-  const [deck, setDeck] = useState<Event[]>([
-    ...events.slice(initialIndex),
-    ...events.slice(0, initialIndex),
-  ]);
-
-  const handleNext = () => {
-    setDeck((prev) => {
-      const [first, ...rest] = prev;
-      return [...rest, first];
-    });
-  };
-
-  const handlePrev = () => {
-    setDeck((prev) => {
-      const last = prev[prev.length - 1];
-      const rest = prev.slice(0, prev.length - 1);
-      return [last, ...rest];
-    });
-  };
-
-  const handleDragEnd = (_: unknown, info: PanInfo) => {
-    if (info.offset.y < -100) {
-      handleNext(); // swipe up
-    }
-  };
-
+  if (!initialEvent) return null;
   return (
-    <AnimatePresence>
-      {initialEvent && (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key="backdrop"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden"
+        onClick={onClose}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.5, ease: "easeInOut" }}
+      >
+        {/* Fullscreen Background Image */}
+        {initialEvent.imageUrl && (
+          <motion.img
+            src={initialEvent.imageUrl}
+            alt="background event"
+            className="absolute inset-0 w-full h-full object-cover opacity-100 blur"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6 }}
+          />
+        )}
+
+        {/* Modal Content */}
         <motion.div
-          key="modal"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-          onClick={onClose}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          key={initialEvent.id}
+          layoutId={`event-${initialEvent.id}`}
+          onClick={(e) => e.stopPropagation()}
+          className="relative bg-white/10 backdrop-blur-2xl border border-white/30 rounded-2xl shadow-2xl overflow-hidden w-full max-w-2xl h-[80vh] flex flex-col"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.8, opacity: 0 }}
+          transition={{
+            type: "spring",
+            stiffness: 120,
+            damping: 20,
+            mass: 0.8,
+            delay: 0.1,
+          }}
         >
-          <div
-            className="relative w-full max-w-xl h-[600px] flex flex-col items-center justify-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Centered card stack */}
-            <div className="relative w-[320px] h-[480px]">
-              {deck.map((event, i) => {
-                if (i > 4) return null;
+          {/* Top Image inside modal */}
+          {initialEvent.imageUrl && (
+            <motion.img
+              src={initialEvent.imageUrl}
+              alt={initialEvent.title}
+              className="w-full h-48 object-cover"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.6 }}
+            />
+          )}
 
-                const isTop = i === 0;
+          {/* Content */}
+          <div className="relative flex-1 flex flex-col justify-between overflow-auto p-6">
+            {/* Background Blur inside modal (optional: can remove if too much) */}
+            {initialEvent.imageUrl && (
+              <motion.img
+                src={initialEvent.imageUrl}
+                alt="background blur"
+                className="absolute inset-0 w-full h-full object-cover opacity-10 blur-lg"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.15 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.6 }}
+              />
+            )}
 
-                return (
-                  <motion.div
-                    key={event.id}
-                    layout
-                    className="absolute w-full h-full"
-                    style={{ zIndex: 100 - i }}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{
-                      x: i * 16,
-                      y: i * 24,
-                      scale: 1 - i * 0.05,
-                      opacity: 1 - i * 0.1,
-                    }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 300,
-                      damping: 30,
-                    }}
-                    drag={isTop ? "y" : false}
-                    dragConstraints={{ top: 0, bottom: 0 }}
-                    dragElastic={0.2}
-                    onDragEnd={isTop ? handleDragEnd : undefined}
-                  >
-                    <EventCard event={event} customClass="h-[300px]" />
-                  </motion.div>
-                );
-              })}
+            {/* Foreground content */}
+            <div className="relative z-10">
+              <h2 className="text-3xl font-bold text-white mb-2">
+                {initialEvent.title}
+              </h2>
+
+              {/* Date */}
+              {initialEvent.time && (
+                <p className="text-sm text-white/60 mb-4">
+                  {initialEvent.time}
+                </p>
+              )}
+
+              {/* Description */}
+              <p className="text-white/80">{initialEvent.description}</p>
             </div>
 
-            {/* Controls */}
-            <div className="mt-8 flex justify-center gap-6">
+            {/* Close Button */}
+            <div className="relative z-10 mt-6 flex justify-center ">
               <button
-                onClick={handlePrev}
-                className="bg-white text-black rounded-full px-4 py-2 shadow"
+                className="bg-white/20 backdrop-blur-md hover:bg-white/30 text-white rounded-full px-6 py-2 transition cursor-pointer"
+                onClick={onClose}
               >
-                Prev
-              </button>
-              <button
-                onClick={handleNext}
-                className="bg-white text-black rounded-full px-4 py-2 shadow"
-              >
-                Next
+                Close
               </button>
             </div>
           </div>
         </motion.div>
-      )}
+      </motion.div>
     </AnimatePresence>
   );
 }

@@ -41,7 +41,7 @@ export default function DropColumn({
         isOver ? "bg-blue-100" : "bg-white"
       }`}
     >
-      <div className="font-semibold mb-2">{format(date, "EEEE")}</div>
+      <div className="font-semibold mb-2 mt-2 sm:mt-0">{format(date, "EEEE")}</div>
       <div className="space-y-4">
         {events.map((event) => (
           <DraggableEventCard
