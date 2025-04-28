@@ -38,7 +38,7 @@ export default function CalendarModal({
           key={initialEvent.id}
           layoutId={`event-${initialEvent.id}`}
           onClick={(e) => e.stopPropagation()}
-          className="relative bg-white/10 backdrop-blur-2xl border border-white/30 rounded-2xl shadow-2xl overflow-hidden w-full max-w-2xl h-[80vh] flex flex-col"
+          className="relative bg-white/10 backdrop-blur-2xl border border-white/30 rounded-2xl shadow-2xl overflow-hidden w-full max-w-2xl flex flex-col"
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.8, opacity: 0 }}

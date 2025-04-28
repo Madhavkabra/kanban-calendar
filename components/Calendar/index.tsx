@@ -70,16 +70,13 @@ const Calendar = () => {
       {
         backend: HTML5Backend,
         preview: true,
-        debugMode: true,
         id: "html5", // ← Add this
       },
       {
         backend: TouchBackend,
-        options: { enableMouseEvents: true },
         preview: true,
         delayTouchStart: 100,
         transition: TouchTransition,
-        debugMode: true,
         id: "touch", // ← Add this
       },
     ],
