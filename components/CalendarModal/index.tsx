@@ -15,7 +15,7 @@ export default function CalendarModal({
         key="backdrop"
         className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden"
         onClick={onClose}
-        initial={{ opacity: 0 }}
+        initial={{ opacity: 0.2 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.5, ease: "easeInOut" }}
