@@ -27,7 +27,6 @@ export default function DropColumn({
     }),
   }));
 
-  // Attach the drop to the ref manually
   useEffect(() => {
     if (dropRef.current) {
       drop(dropRef.current);
@@ -37,11 +36,13 @@ export default function DropColumn({
   return (
     <div
       ref={dropRef}
-      className={` rounded-xl shadow p-2 transition-colors duration-200 min-h-screen ${
+      className={`rounded-xl shadow p-2 transition-colors duration-200 min-h-screen ${
         isOver ? "bg-blue-100" : "bg-white"
       }`}
     >
-      <div className="font-semibold mb-2 mt-2 sm:mt-0">{format(date, "EEEE")}</div>
+      <div className="font-semibold mb-2 mt-2 sm:mt-0">
+        {format(date, "EEEE")}
+      </div>
       <div className="space-y-4">
         {events.map((event) => (
           <DraggableEventCard

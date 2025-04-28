@@ -6,32 +6,34 @@ import { Event } from "@/types";
 import { addDays, format, isSameDay, startOfWeek, subDays } from "date-fns";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import { useMediaQuery } from "react-responsive";
-import EdgeDragWatcher from "../EdgeDragWatcher";
-import { TouchBackend } from "react-dnd-touch-backend";
 import { MultiBackend, TouchTransition } from "react-dnd-multi-backend";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { TouchBackend } from "react-dnd-touch-backend";
+import { useMediaQuery } from "react-responsive";
+import { Preview } from "react-dnd-preview"; // <--- ADD THIS
+import EdgeDragWatcher from "../EdgeDragWatcher";
 import CalendarModal from "../CalendarModal";
+import EventCard from "../EventCard"; // <--- For preview rendering
 
 const Calendar = () => {
   const isMobile = useMediaQuery({ maxWidth: 768 });
   const [currentDate, setCurrentDate] = useState(new Date("2024-03-11"));
   const [calendarEvents, setCalendarEvents] = useState(events);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  //   const [selectedDate, setSelectedDate] = useState(currentDate);
 
-  // Calculate current and next sets of dates
   const currentWeekDates = useMemo(() => {
     const start = startOfWeek(currentDate, { weekStartsOn: 1 });
     return Array.from({ length: 7 }, (_, i) => addDays(start, i));
   }, [currentDate]);
 
   const [showBoard, setShowBoard] = useState(false);
+  const currentDateRef = useRef(currentDate);
+
   useEffect(() => {
     currentDateRef.current = currentDate;
   }, [currentDate]);
+
   useEffect(() => {
-    // code to load next pages
     handleNext();
     setTimeout(() => {
       handlePrev();
@@ -70,18 +72,31 @@ const Calendar = () => {
       {
         backend: HTML5Backend,
         preview: true,
-        id: "html5", // ← Add this
+        id: "html5",
       },
       {
         backend: TouchBackend,
         preview: true,
         transition: TouchTransition,
-        id: "touch", // ← Add this
+        id: "touch",
       },
     ],
   });
 
-  const currentDateRef = useRef(currentDate);
+  // === PREVIEW GENERATION ===
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const generatePreview = ({ itemType, item, style }: any): any => {
+    if (itemType === "event") {
+      return (
+        <div style={{ ...style, zIndex: 1000, pointerEvents: "none" }}>
+          <div className="max-w-xs">
+            <EventCard event={item} />
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <>
@@ -93,17 +108,16 @@ const Calendar = () => {
       )}
 
       <DndProvider backend={MultiBackend} options={getBackendOptions()}>
+        {isMobile && <Preview generator={generatePreview} />}{" "}
+        {/* <-- ADD PREVIEW */}
         <EdgeDragWatcher
           moveToNext={handleNext}
           moveToPrev={handlePrev}
           isMobile={isMobile}
         />
-
         {showBoard && (
           <div className="min-h-screen sm:p-4 p-2 bg-gradient-to-br from-[#f6f8ff] to-[#eef1f9]">
             {/* Header */}
-            {/* Header */}
-
             <div className="flex justify-between items-center mb-6 px-4 py-3 bg-white rounded-xl shadow-md">
               <button
                 onClick={handlePrev}
@@ -132,13 +146,13 @@ const Calendar = () => {
                   <button
                     key={date.toString()}
                     onClick={() => setCurrentDate(date)}
-                    className={`flex flex-col items-center flex-shrink-0 px-3 py-2 rounded-lg 
-        ${
-          isSameDay(date, currentDate)
-            ? "bg-gradient-to-br from-indigo-600 to-purple-600 text-white"
-            : " text-gray-700 hover:bg-gray-200"
-        }
-        transition-colors min-w-[48px]`}
+                    className={`flex flex-col items-center flex-shrink-0 px-3 py-2 rounded-lg
+                      ${
+                        isSameDay(date, currentDate)
+                          ? "bg-gradient-to-br from-indigo-600 to-purple-600 text-white"
+                          : "text-gray-700 hover:bg-gray-200"
+                      }
+                      transition-colors min-w-[48px]`}
                   >
                     <span className="text-sm font-medium">
                       {format(date, "EEE")}
@@ -160,30 +174,28 @@ const Calendar = () => {
                   events={
                     calendarEvents[format(currentDate, "yyyy-MM-dd")] ?? []
                   }
-                  onDropEvent={(event) => {
+                  onDropEvent={(event) =>
                     handleDrop(
                       format(currentDateRef.current, "yyyy-MM-dd"),
                       event
-                    );
-                  }}
+                    )
+                  }
                 />
               </div>
             ) : (
-              <div>
-                <div className="grid grid-cols-7 gap-4">
-                  {currentWeekDates.map((date) => {
-                    const dayStr = format(date, "yyyy-MM-dd");
-                    return (
-                      <DropColumn
-                        key={dayStr}
-                        onCardClick={(event) => setSelectedEvent(event)}
-                        date={date}
-                        events={calendarEvents[dayStr] ?? []}
-                        onDropEvent={(event) => handleDrop(dayStr, event)}
-                      />
-                    );
-                  })}
-                </div>
+              <div className="grid grid-cols-7 gap-4">
+                {currentWeekDates.map((date) => {
+                  const dayStr = format(date, "yyyy-MM-dd");
+                  return (
+                    <DropColumn
+                      key={dayStr}
+                      onCardClick={(event) => setSelectedEvent(event)}
+                      date={date}
+                      events={calendarEvents[dayStr] ?? []}
+                      onDropEvent={(event) => handleDrop(dayStr, event)}
+                    />
+                  );
+                })}
               </div>
             )}
           </div>
