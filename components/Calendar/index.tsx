@@ -75,7 +75,6 @@ const Calendar = () => {
       {
         backend: TouchBackend,
         preview: true,
-        delayTouchStart: 100,
         transition: TouchTransition,
         id: "touch", // ← Add this
       },
@@ -104,28 +103,27 @@ const Calendar = () => {
           <div className="min-h-screen sm:p-4 p-2 bg-gradient-to-br from-[#f6f8ff] to-[#eef1f9]">
             {/* Header */}
             {/* Header */}
-            {!isMobile && (
-              <div className="flex justify-between items-center mb-6 px-4 py-3 bg-white rounded-xl shadow-md">
-                <button
-                  onClick={handlePrev}
-                  className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-xl text-gray-600 transition-colors"
-                >
-                  ←
-                </button>
 
-                <h1 className="text-lg sm:text-xl font-bold text-gray-700">
-                  {format(currentWeekDates[0], "MMM d")} -{" "}
-                  {format(currentWeekDates[6], "MMM d")}
-                </h1>
+            <div className="flex justify-between items-center mb-6 px-4 py-3 bg-white rounded-xl shadow-md">
+              <button
+                onClick={handlePrev}
+                className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-xl text-gray-600 transition-colors"
+              >
+                ←
+              </button>
 
-                <button
-                  onClick={handleNext}
-                  className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-xl text-gray-600 transition-colors"
-                >
-                  →
-                </button>
-              </div>
-            )}
+              <h1 className="text-lg sm:text-xl font-bold text-gray-700">
+                {format(currentWeekDates[0], "MMM d")} -{" "}
+                {format(currentWeekDates[6], "MMM d")}
+              </h1>
+
+              <button
+                onClick={handleNext}
+                className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-xl text-gray-600 transition-colors"
+              >
+                →
+              </button>
+            </div>
 
             {/* Week Days */}
             {isMobile && (

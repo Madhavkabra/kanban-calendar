@@ -46,7 +46,7 @@ export default function EdgeDragWatcher({
           }, 1000);
 
           edgeDelayTimerRef.current = null;
-        }, 1000);
+        }, 100);
       }
     } else {
       clearTimers();

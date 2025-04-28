@@ -18,7 +18,7 @@ export default function CalendarModal({
         initial={{ opacity: 0.2 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.5, ease: "easeInOut" }}
+        transition={{ duration: 0, ease: "easeInOut" }}
       >
         {/* Fullscreen Background Image */}
         {initialEvent.imageUrl && (
@@ -47,7 +47,7 @@ export default function CalendarModal({
             stiffness: 120,
             damping: 20,
             mass: 0.8,
-            delay: 0.1,
+            delay: 0,
           }}
         >
           {/* Top Image inside modal */}
@@ -64,19 +64,7 @@ export default function CalendarModal({
           )}
 
           {/* Content */}
-          <div className="relative flex-1 flex flex-col justify-between overflow-auto p-6">
-            {/* Background Blur inside modal (optional: can remove if too much) */}
-            {initialEvent.imageUrl && (
-              <motion.img
-                src={initialEvent.imageUrl}
-                alt="background blur"
-                className="absolute inset-0 w-full h-full object-cover opacity-10 blur-lg"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.15 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.6 }}
-              />
-            )}
+          <div className="relative flex-1 flex flex-col justify-between overflow-auto p-6 bg-gradient-to-br from-indigo-600 to-purple-600">
 
             {/* Foreground content */}
             <div className="relative z-10">
