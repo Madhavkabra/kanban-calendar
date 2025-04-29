@@ -6,14 +6,14 @@ import { Event } from "@/types";
 import { addDays, format, isSameDay, startOfWeek, subDays } from "date-fns";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
-import { MultiBackend, TouchTransition } from "react-dnd-multi-backend";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { MultiBackend, TouchTransition } from "react-dnd-multi-backend";
+import { Preview } from "react-dnd-preview";
 import { TouchBackend } from "react-dnd-touch-backend";
 import { useMediaQuery } from "react-responsive";
-import { Preview } from "react-dnd-preview"; // <--- ADD THIS
-import EdgeDragWatcher from "../EdgeDragWatcher";
 import CalendarModal from "../CalendarModal";
-import EventCard from "../EventCard"; // <--- For preview rendering
+import EdgeDragWatcher from "../EdgeDragWatcher";
+import EventCard from "../EventCard";
 
 const Calendar = () => {
   const isMobile = useMediaQuery({ maxWidth: 768 });
@@ -28,6 +28,7 @@ const Calendar = () => {
 
   const [showBoard, setShowBoard] = useState(false);
   const currentDateRef = useRef(currentDate);
+  const swipeContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     currentDateRef.current = currentDate;
@@ -69,11 +70,7 @@ const Calendar = () => {
 
   const getBackendOptions = () => ({
     backends: [
-      {
-        backend: HTML5Backend,
-        preview: true,
-        id: "html5",
-      },
+      { backend: HTML5Backend, preview: true, id: "html5" },
       {
         backend: TouchBackend,
         preview: true,
@@ -83,7 +80,6 @@ const Calendar = () => {
     ],
   });
 
-  // === PREVIEW GENERATION ===
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const generatePreview = ({ itemType, item, style }: any): any => {
     if (itemType === "event") {
@@ -98,6 +94,39 @@ const Calendar = () => {
     return null;
   };
 
+  // === Swipe Logic ===
+  useEffect(() => {
+    const container = swipeContainerRef.current;
+    if (!container) return;
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartX = e.changedTouches[0].screenX;
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const diff = touchEndX - touchStartX;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) {
+          handlePrev(); // swipe right
+        } else {
+          handleNext(); // swipe left
+        }
+      }
+    };
+
+    container.addEventListener("touchstart", onTouchStart);
+    container.addEventListener("touchend", onTouchEnd);
+
+    return () => {
+      container.removeEventListener("touchstart", onTouchStart);
+      container.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [handleNext, handlePrev]);
+
   return (
     <>
       {selectedEvent && (
@@ -108,15 +137,17 @@ const Calendar = () => {
       )}
 
       <DndProvider backend={MultiBackend} options={getBackendOptions()}>
-        {isMobile && <Preview generator={generatePreview} />}{" "}
-        {/* <-- ADD PREVIEW */}
+        {isMobile && <Preview generator={generatePreview} />}
         <EdgeDragWatcher
           moveToNext={handleNext}
           moveToPrev={handlePrev}
           isMobile={isMobile}
         />
         {showBoard && (
-          <div className="min-h-screen sm:p-4 p-2 bg-gradient-to-br from-[#f6f8ff] to-[#eef1f9]">
+          <div
+            ref={swipeContainerRef}
+            className="min-h-screen sm:p-4 p-2 bg-gradient-to-br from-[#f6f8ff] to-[#eef1f9]"
+          >
             {/* Header */}
             <div className="flex justify-between items-center mb-6 px-4 py-3 bg-white rounded-xl shadow-md">
               <button
@@ -125,12 +156,10 @@ const Calendar = () => {
               >
                 ←
               </button>
-
               <h1 className="text-lg sm:text-xl font-bold text-gray-700">
                 {format(currentWeekDates[0], "MMM d")} -{" "}
                 {format(currentWeekDates[6], "MMM d")}
               </h1>
-
               <button
                 onClick={handleNext}
                 className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-xl text-gray-600 transition-colors"
